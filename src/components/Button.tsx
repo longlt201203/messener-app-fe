@@ -1,8 +1,10 @@
-import { PropsWithChildren } from "react";
+import { MouseEventHandler, PropsWithChildren } from "react";
 import styled from "styled-components";
 
 interface ButtonProps {
     height?: number;
+    type?: "submit" | "reset" | "button";
+    onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
 const PrimaryButton = styled.button<ButtonProps>`
@@ -16,7 +18,7 @@ const PrimaryButton = styled.button<ButtonProps>`
 `;
 
 function Button(props: PropsWithChildren<ButtonProps>) {
-    return <PrimaryButton {...props}></PrimaryButton>;
+    return <PrimaryButton {...props} type={props.type} onClick={props.onClick}></PrimaryButton>;
 }
 
 export default Button;

@@ -6,7 +6,14 @@ import furinaAvt from "./assets/furina-avt.jpg";
 import UserAvatar from './components/UserAvatar';
 import UploadButton from './components/UploadButton';
 import TextInput from './components/TextInput';
-import { ChangeEventHandler, useState } from 'react';
+import { ChangeEventHandler, useEffect, useState } from 'react';
+import Button from './components/Button';
+import CreateUserDto from './dto/create-user.dto';
+import axios, { AxiosResponse } from 'axios';
+import UserDto from './dto/user.dto';
+import useAuth from './hooks/useAuth';
+import Globals from './etc/globals';
+import useSocket from './hooks/useSocket';
 
 const RoomsContainer = styled.div`
   grid-column: span 4;
@@ -49,10 +56,19 @@ const MessagesContainer = styled.div`
 `;
 
 function Messages() {
+  const [message, setMessage] = useState("");
+  
+  const handleSubmitMessage = (text: string) => {
+    // Message Logic Here
+
+    // ------------------
+    setMessage("");
+  }
+
   return (
     <MessagesContainer>
-      <MessageCards/>
-      <MessageInput/>
+      <MessageCards />
+      <MessageInput value={message} onChange={(text) => setMessage(text)} onSubmit={handleSubmitMessage} />
     </MessagesContainer>
   );
 }
@@ -63,7 +79,7 @@ const AvatarInputContainer = styled.div`
   column-gap: 16px;
 `;
 
-function AvatarInput(props: { onAvtChange?: (newAvtUrl: string) => void }) {
+function AvatarInput(props: { onAvtChange?: (newAvtUrl: string, newAvtFile: File) => void }) {
   const [avt, setAvt] = useState("");
 
   const handleUploadAvt: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -71,7 +87,7 @@ function AvatarInput(props: { onAvtChange?: (newAvtUrl: string) => void }) {
     if (file) {
       const newAvtUrl = URL.createObjectURL(file);
       setAvt(newAvtUrl);
-      props.onAvtChange && props.onAvtChange(newAvtUrl);
+      props.onAvtChange && props.onAvtChange(newAvtUrl, file);
     }
   }
 
@@ -96,10 +112,52 @@ const InformationBarContainer = styled.div`
 `;
 
 function InformationBar() {
+  const { changeUserId } = useAuth();
+
+  const [avtFile, setAvtFile] = useState<File | undefined>();
+  const [userData, setUserData] = useState<CreateUserDto>({
+    avt: "",
+    name: ""
+  });
+
+  const handleAvtChange = (newAvtUrl: string, newAvtFile: File) => {
+    setUserData({ ...userData, avt: newAvtUrl });
+    setAvtFile(newAvtFile);
+  }
+
+  const handleNameChange = (newName: string) => {
+    setUserData({ ...userData, name: newName });
+  }
+
+  const handleEnterRoom = async () => {
+    if (avtFile) {
+      const formData = new FormData();
+      formData.set("file", avtFile);
+      try {
+        const res = await axios.post<{ url: string }>(`${Globals.API_URL}/local-files/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        });
+        userData.avt = res.data.url;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    try {
+      let res = await axios.post<UserDto>(`${Globals.API_URL}/users/`, userData);
+      changeUserId(res.data.id);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <InformationBarContainer>
-      <AvatarInput/>
-      <TextInput id='name' name='name' label='Name' placeholder='Enter Your Name...'/>
+      <AvatarInput onAvtChange={handleAvtChange} />
+      <TextInput id='name' name='name' label='Name' placeholder='Enter Your Name...' onTextChange={handleNameChange} />
+      <Button type='button' height={32} onClick={(e) => handleEnterRoom()}>Enter Room</Button>
     </InformationBarContainer>
   );
 }
@@ -115,10 +173,12 @@ const MessageBoxContainer = styled.div`
 `;
 
 function MessageBox() {
+  const { userId } = useAuth();
+
   return (
     <MessageBoxContainer>
-      <InformationBar/>
-      <Messages/>
+      {!userId && <InformationBar />}
+      <Messages />
     </MessageBoxContainer>
   )
 }
@@ -130,6 +190,17 @@ const AppContainer = styled.div`
 `;
 
 function App() {
+  const { userId, login, accessToken } = useAuth();
+  const { connect, disconnect } = useSocket();
+
+  useEffect(() => {
+    if (userId) login();
+    if (accessToken) {
+      disconnect();
+      connect();
+    }
+  }, [userId, accessToken]);
+
   return (
     <>
       <Navbar />

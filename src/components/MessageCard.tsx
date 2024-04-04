@@ -1,12 +1,12 @@
 import styled, { css } from "styled-components";
 import Headings from "./Headings";
-import { UserProfile } from "../types";
 import UserAvatar from "./UserAvatar";
+import UserDto from "../dto/user.dto";
 
 interface MessageCardProps {
     position?: "left" | "right";
     variant?: "primary" | "default";
-    profile?: UserProfile;
+    profile?: UserDto;
     messages?: string[];
 }
 

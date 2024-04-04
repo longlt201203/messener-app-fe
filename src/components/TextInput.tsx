@@ -5,6 +5,7 @@ interface TextInputProps {
     name?: string;
     placeholder?: string;
     label?: string;
+    onTextChange?: (text: string) => void;
 }
 
 const TextInputContainer = styled.div`
@@ -32,7 +33,7 @@ function TextInput(props: TextInputProps) {
     return (
         <TextInputContainer>
             {props.label && <TextInputLabel htmlFor={props.id}>{props.label}</TextInputLabel>}
-            <TextInputInput type="text" id={props.id} name={props.name} placeholder={props.placeholder} />
+            <TextInputInput type="text" id={props.id} name={props.name} placeholder={props.placeholder} onChange={(e) => props.onTextChange && props.onTextChange(e.target.value)} />
         </TextInputContainer>
     );
 }
