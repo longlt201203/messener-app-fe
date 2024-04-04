@@ -13,6 +13,7 @@ function SocketProvider(props: PropsWithChildren<SocketProviderProps>) {
     const [chatData, setChatData] = useState<ChatMessageDto[]>([]);
 
     const onUpdateChat = (data: ChatMessageDto[]) => {
+        console.log(data);
         setChatData(data);
     }
 

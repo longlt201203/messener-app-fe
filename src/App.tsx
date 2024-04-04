@@ -37,8 +37,11 @@ const MessageCardsContainer = styled.div`
 `;
 
 function MessageCards() {
+  const { chatData } = useSocket();
+
   return (
     <MessageCardsContainer>
+      {chatData.length > 0 && chatData.map((item, index) => (<MessageCard messages={["Hi!"]} profile={{ id: "", name: "Le Thanh Long", avt: furinaAvt }} />))}
       <MessageCard messages={["Hi!"]} profile={{ id: "", name: "Le Thanh Long", avt: furinaAvt }} />
       <MessageCard variant='primary' position='right' messages={["Hello", "I'm Long"]} profile={{ id: "", name: "Le Thanh Long", avt: furinaAvt }} />
     </MessageCardsContainer>
@@ -57,10 +60,13 @@ const MessagesContainer = styled.div`
 
 function Messages() {
   const [message, setMessage] = useState("");
+
+  const { accessToken } = useAuth();
+  const { sendMessage } = useSocket();
   
   const handleSubmitMessage = (text: string) => {
     // Message Logic Here
-
+    if (accessToken && text) sendMessage(text, accessToken);
     // ------------------
     setMessage("");
   }

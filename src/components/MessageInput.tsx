@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Button from '../components/Button';
 import SendIcon from "../assets/SendIcon.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface MessageInputProps {
     onChange?: (text: string) => void;
@@ -33,11 +33,15 @@ const MessageInputInput = styled.input`
 `;
 
 function MessageInput(props: MessageInputProps) {
-    const [text, setText] = useState<string>(props.value || "");
+    const [text, setText] = useState<string>("");
+
+    useEffect(() => {
+        setText(props.value || "");
+    }, [props.value])
 
     return (
         <MessageInputContainer>
-            <MessageInputInput placeholder="Enter your message..." value={props.value} onChange={(e) => {
+            <MessageInputInput placeholder="Enter your message..." value={text} onChange={(e) => {
                 setText(e.target.value);
                 props.onChange && props.onChange(e.target.value);
             }} onKeyDown={(e) => {
