@@ -8,10 +8,10 @@ import AuthProvider from './components/AuthProvider.tsx'
 import SocketProvider from './components/SocketProvider.tsx'
 import { io } from 'socket.io-client'
 
-const socket = io("ws://localhost:9000", { autoConnect: false });
+const socket = io("ws://26.123.114.212:9000", { autoConnect: false });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <AuthProvider>
       <SocketProvider socket={socket}>
         <ThemeProvider theme={theme}>
@@ -19,5 +19,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </ThemeProvider>
       </SocketProvider>
     </AuthProvider>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 )

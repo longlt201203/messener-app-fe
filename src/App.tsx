@@ -37,13 +37,20 @@ const MessageCardsContainer = styled.div`
 `;
 
 function MessageCards() {
+  const { profile } = useAuth();
   const { chatData } = useSocket();
 
   return (
     <MessageCardsContainer>
-      {chatData.length > 0 && chatData.map((item, index) => (<MessageCard messages={["Hi!"]} profile={{ id: "", name: "Le Thanh Long", avt: furinaAvt }} />))}
-      <MessageCard messages={["Hi!"]} profile={{ id: "", name: "Le Thanh Long", avt: furinaAvt }} />
-      <MessageCard variant='primary' position='right' messages={["Hello", "I'm Long"]} profile={{ id: "", name: "Le Thanh Long", avt: furinaAvt }} />
+      {
+        chatData.length > 0 && chatData.map((item, index) => profile && item.from.id == profile.id ? (
+          <MessageCard variant='primary' position='right' key={index} messages={item.messages} profile={item.from} />
+        ) : (
+          <MessageCard variant='default' position='left' key={index} messages={item.messages} profile={item.from} />
+        ))
+      }
+      {/* <MessageCard messages={["Hi!"]} profile={{ id: "", name: "Le Thanh Long", avt: furinaAvt }} />
+      <MessageCard variant='primary' position='right' messages={["Hello", "I'm Long"]} profile={{ id: "", name: "Le Thanh Long", avt: furinaAvt }} /> */}
     </MessageCardsContainer>
   );
 }
@@ -63,7 +70,7 @@ function Messages() {
 
   const { accessToken } = useAuth();
   const { sendMessage } = useSocket();
-  
+
   const handleSubmitMessage = (text: string) => {
     // Message Logic Here
     if (accessToken && text) sendMessage(text, accessToken);
@@ -193,19 +200,26 @@ const AppContainer = styled.div`
   display: grid;
   grid-template-columns: ${props => Array.from({ length: 12 }, _ => `1fr`).join(" ")};
   height: 100vh;
+  overflow: auto;
 `;
 
 function App() {
-  const { userId, login, accessToken } = useAuth();
+  const { userId, login, accessToken, profile, fetchProfile } = useAuth();
   const { connect, disconnect } = useSocket();
 
   useEffect(() => {
-    if (userId) login();
+    if (userId && !accessToken) login();
     if (accessToken) {
+      fetchProfile();
+    }
+  }, [userId, accessToken]);
+
+  useEffect(() => {
+    if (profile) {
       disconnect();
       connect();
     }
-  }, [userId, accessToken]);
+  }, [profile]);
 
   return (
     <>

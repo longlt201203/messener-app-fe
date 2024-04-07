@@ -25,7 +25,8 @@ const NavbarContainer = styled.div`
     display: flex;
     box-sizing: border-box;
     border-bottom: 1px solid;
-    /* position: absolute; */
+    position: sticky;
+    top: 0;
     background-color: white;
     /* width: 100%; */
 `;
